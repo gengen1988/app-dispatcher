@@ -72,6 +72,14 @@ appId | string | 要启动的应用
 
 与某个 native app 交互的接口
 
+### device.shutdown
+
+关机
+
+### device.reboot
+
+重启
+
 ### contextstack.begin
 
 向 Context Stack 发送的启动应用消息
@@ -153,11 +161,43 @@ ticket | string | 用于区分操作的唯一标识，UUID
 file   | string | 要识别的音频文件位置
 text   | string | 识别结果
 
+### appdispatcher.acknownledgement
+
+确认回执。APP Dispatcher 收到这个消息后，会解除超时事件。
+
+APP Dispatcher 向 APP Dispatcher Input Node-RED node 发送信息时，会加入 ticket
+
+**payload**
+
+root
+
+key     | value  | description
+------- | ------ | -----------------------
+ticket  | string | 标明消息的 ID
+topic   | string | 消息的名称，如：input.system.keydown
+payload | string | 消息的 payload
+
+### appdispatcher.rejection
+
+拒绝回执。APP Dispatcher 收到这个消息后，会解除超时事件。同时，向 MQTT 中发布事件对应的默认处理消息。
+
+例如：
+
+input.system.keydown 在收到 rejection 后。会发送 default.input.system.keydown
+
+**payload**
+
+key     | value  | description
+------- | ------ | -----------------------
+ticket  | string | 标明消息的 ID
+topic   | string | 消息的名称，如：input.system.keydown
+payload | string | 消息的 payload
+
 ## 硬件输出
 
 本质来讲和 native app 交换一样。不过效果是操作的外部硬件执行器。
 
-### output.led.put
+### output.led.set
 
 操作 led 的事件
 
@@ -191,7 +231,7 @@ ticket | string  | 用于区分操作的唯一标识，UUID
 id     | string  | 要操作的 LED ID
 on     | boolean | 开关状态
 
-### output.motor.put
+### output.motor.set
 
 操作电机。可以是直流电机，也可以是步进电机。
 
