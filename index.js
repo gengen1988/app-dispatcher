@@ -1,6 +1,6 @@
-const AppDispatcher = require('./app-dispatcher');
-const ContextStack = require('./context-stack');
-const ContextStackClient = require('./context-stack-client');
+const AppDispatcher = require('./lib/app-dispatcher');
+const ContextStack = require('./lib/context-stack');
+const ContextStackClient = require('./lib/context-stack-client');
 
 const mqtt = require('mqtt');
 const redis = require('redis');
