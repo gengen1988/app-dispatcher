@@ -41,12 +41,12 @@ AppDispatcher.prototype._initialize = function initialize() {
       console.log(err);
     }
 
-    if (topic === 'appdispatcher.acknownledgement') {
+    if (topic === COMMAND.ACKNOWLEDGEMENT) {
       self._acknowledgement(payload);
       return;
     }
 
-    if (topic === 'appdispatcher.rejection') {
+    if (topic === COMMAND.REJECTION) {
       self._rejection(payload);
       return;
     }
@@ -56,7 +56,7 @@ AppDispatcher.prototype._initialize = function initialize() {
 };
 
 AppDispatcher.prototype._pass = function pass(topic, payload) {
-
+  const self = this;
   const contextStackClient = this.contextStackClient;
   const mqttClient = this.mqttClient;
 
@@ -64,12 +64,11 @@ AppDispatcher.prototype._pass = function pass(topic, payload) {
     if (err) return console.error(err);
 
     var timeoutId = setTimeout(function() {
-      mqttClient.publish(`default.${topic}`, JSON.stringify(payload));
+      this._resend(topic, payload);
     }, TIMEOUT);
 
     var sendIn = {topic, payload, ticket: timeoutId};
     mqttClient.publish(appId, JSON.stringify(sendIn));
-
   });
 
 };
@@ -83,5 +82,12 @@ AppDispatcher.prototype._rejection = function rejection(msg) {
   const mqttClient = this.mqttClient;
   const timeoutId = msg.ticket;
   clearTimeout(timeoutId);
-  mqttClient.publish(`default.${msg.topic}`, JSON.stringify(msg.payload));
+  this._resend(msg.topic, msg.payload);
+};
+
+AppDispatcher.prototype._resend = function resend(topic, payload) {
+  const segment = topic.split('.');
+  if (segment[1] === 'system') {
+    mqttClient.publish(`default.${topic}`, JSON.stringify(payload));
+  }
 };
