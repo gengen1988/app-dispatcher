@@ -1,11 +1,13 @@
 'use strict';
 
+const mqtt = require('mqtt');
+const ContextStackClient = require('./context-stack-client');
+
 const COMMAND = {
   KEY_DOWN: 'input.system.keydown',
   BEGIN_CONTEXT: 'input.system.begincontext',
   END_CONTEXT: 'input.system.endcontext',
   VOICE: 'input.user.unrecognizedvoice',
-
   ACKNOWLEDGEMENT: 'appdispatcher.acknowledgement',
   REJECTION: 'appdispatcher.rejection'
 };
@@ -17,6 +19,9 @@ function AppDispatcher(opts) {
 
   opts = opts || {};
   this.mqttClient = opts.mqttClient || mqtt.connect();
+  this.contextStackClient = opts.contextStackClient || ContextStackClient({
+    mqttClient: this.mqttClient
+  });
   this._initialize();
 }
 
@@ -91,3 +96,5 @@ AppDispatcher.prototype._resend = function resend(topic, payload) {
     mqttClient.publish(`default.${topic}`, JSON.stringify(payload));
   }
 };
+
+module.exports = AppDispatcher;
